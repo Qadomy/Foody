@@ -12,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import coil.annotation.ExperimentalCoilApi
 import com.qadomy.foody.R
 import com.qadomy.foody.adapter.RecipeAdapter
 import com.qadomy.foody.databinding.FragmentRecipesBinding
@@ -22,8 +21,8 @@ import com.qadomy.foody.utils.observeOnce
 import com.qadomy.foody.viewmodels.MainViewModel
 import com.qadomy.foody.viewmodels.RecipesViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_recipes.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -79,15 +78,29 @@ class RecipesFragment : Fragment() {
         binding.mainViewModel = mainViewModel
 
         setupRecyclerView()
-        readDatabase()
+
+        recipesViewModel.readBackOnline.observe(viewLifecycleOwner, {
+            recipesViewModel.backOnline = it
+        })
 
         // init network listener
-        networkListener = NetworkListener()
-        networkListener.checkNetworkAvailablity(requireContext())
-
+        lifecycleScope.launch {
+            networkListener = NetworkListener()
+            networkListener.checkNetworkAvailability(requireContext())
+                .collect { status ->
+                    Log.d("NetworkListener", status.toString())
+                    recipesViewModel.networkStatus = status
+                    recipesViewModel.showNetworkStatus()
+                    readDatabase()
+                }
+        }
         // navigate to bottom sheet when click on fab button
-        binding.recipesFab.setOnClickListener{
-            findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+        binding.recipesFab.setOnClickListener {
+            if (recipesViewModel.networkStatus) {
+                findNavController().navigate(R.id.action_recipesFragment_to_recipesBottomSheet)
+            } else {
+                recipesViewModel.showNetworkStatus()
+            }
         }
 
         return binding.root
@@ -103,7 +116,7 @@ class RecipesFragment : Fragment() {
             mainViewModel.readRecipes.observeOnce(viewLifecycleOwner, { database ->
                 if (database.isNotEmpty() && !args.backFromBottomSheet) {
                     Log.d("RecipesFragment", "read from database")
-                    mAdapter.setData(database[0].foodRecipe) 
+                    mAdapter.setData(database[0].foodRecipe)
                     hideShimmerEffect()
                 } else {
                     requestApiData()
