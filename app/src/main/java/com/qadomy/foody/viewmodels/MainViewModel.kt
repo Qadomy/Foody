@@ -41,6 +41,7 @@ class MainViewModel @ViewModelInject constructor(
 
     // MutableLiveData for store food recipes
     var recipesResponse: MutableLiveData<NetworkResult<FoodRecipe>> = MutableLiveData()
+    var searchRecipesResponse:MutableLiveData<NetworkResult<FoodRecipe>> = MutableLiveData()
 
     /*
     get recipes using scope from repository
@@ -48,7 +49,9 @@ class MainViewModel @ViewModelInject constructor(
     fun getRecipes(queries: Map<String, String>) = viewModelScope.launch {
         getRecipesSafeCall(queries)
     }
-
+    fun searchRecipes(searchQuery:Map<String, String>) = viewModelScope.launch {
+        searchRecipesSafeCall(searchQuery)
+    }
     // endregion
 
 
@@ -79,6 +82,23 @@ class MainViewModel @ViewModelInject constructor(
         }
     }
 
+    /*
+    check the call safety for search recipes
+     */
+    private suspend fun searchRecipesSafeCall(searchQuery: Map<String, String>) {
+        searchRecipesResponse.value = NetworkResult.Loading()
+        if (hasInternetConnection()) {
+            try {
+                val response = repository.remote.searchRecipes(searchQuery)
+                searchRecipesResponse.value = handleFoodRecipesResponse(response)
+
+            } catch (e: Exception) {
+                searchRecipesResponse.value = NetworkResult.Error("Recipes not found!")
+            }
+        } else {
+            searchRecipesResponse.value = NetworkResult.Error("No Internet Connection!!")
+        }
+    }
 
     /*
     function for save recipes into database

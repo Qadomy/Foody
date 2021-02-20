@@ -12,6 +12,7 @@ import com.qadomy.foody.utils.Constants.Companion.API_KEY
 import com.qadomy.foody.utils.Constants.Companion.DEFAULT_DIET_TYPE
 import com.qadomy.foody.utils.Constants.Companion.DEFAULT_MEAL_TYPE
 import com.qadomy.foody.utils.Constants.Companion.DEFAULT_RECIPES_NUMBER
+import com.qadomy.foody.utils.Constants.Companion.QUERY_SEARCH
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -40,7 +41,7 @@ class RecipesViewModel @ViewModelInject constructor(
         }
 
     /** function for save back online in data store */
-    fun saveBackOnline(backOnline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+    private fun saveBackOnline(backOnline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         dataStoreRepository.saveBackOnline(backOnline)
     }
 
@@ -62,6 +63,19 @@ class RecipesViewModel @ViewModelInject constructor(
         queries[Constants.QUERY_ADD_RECIPE_INFORMATION] = "true"
         queries[Constants.QUERY_FILL_INGREDIENTS] = "true"
 
+
+        return queries
+    }
+
+    /** function fot set queries to search data from API */
+    fun applySearchQuery(searchQuery: String): HashMap<String, String> {
+        val queries: HashMap<String, String> = HashMap()
+
+        queries[QUERY_SEARCH] = searchQuery
+        queries[Constants.QUERY_NUMBER] = DEFAULT_RECIPES_NUMBER
+        queries[Constants.QUERY_API_KEY] = API_KEY
+        queries[Constants.QUERY_ADD_RECIPE_INFORMATION] = "true"
+        queries[Constants.QUERY_FILL_INGREDIENTS] = "true"
 
         return queries
     }

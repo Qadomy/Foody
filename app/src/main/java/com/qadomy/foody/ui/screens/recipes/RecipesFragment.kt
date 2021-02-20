@@ -2,10 +2,9 @@ package com.qadomy.foody.ui.screens.recipes
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +27,7 @@ import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
-class RecipesFragment : Fragment() {
+class RecipesFragment : Fragment(), SearchView.OnQueryTextListener {
 
     // args -> get data from navigation
     private val args by navArgs<RecipesFragmentArgs>()
@@ -94,6 +93,11 @@ class RecipesFragment : Fragment() {
                     readDatabase()
                 }
         }
+
+
+        // enable menu
+        setHasOptionsMenu(true)
+
         // navigate to bottom sheet when click on fab button
         binding.recipesFab.setOnClickListener {
             if (recipesViewModel.networkStatus) {
@@ -105,6 +109,33 @@ class RecipesFragment : Fragment() {
 
         return binding.root
     }
+
+
+    // region Menu
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.recipe_menu, menu)
+
+        // set search icon
+        val search = menu.findItem(R.id.menu_search)
+        val searchView = search.actionView as? SearchView
+        searchView?.isSubmitButtonEnabled = true
+        searchView?.setOnQueryTextListener(this)
+
+    }
+
+
+    // on Query Text Listener
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if (query != null)
+            searchApiData(query)
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        return true
+    }
+
+    // endregion
 
 
     /*
@@ -163,6 +194,31 @@ class RecipesFragment : Fragment() {
         })
     }
 
+    /** function for search data from API */
+    private fun searchApiData(searchQuery: String) {
+        showShimmerEffect()
+        mainViewModel.searchRecipes(recipesViewModel.applySearchQuery(searchQuery))
+        mainViewModel.searchRecipesResponse.observe(viewLifecycleOwner, { response ->
+            when (response) {
+                is NetworkResult.Success -> {
+                    hideShimmerEffect()
+                    val foodRecipe = response.data
+                    foodRecipe?.let { mAdapter.setData(it) }
+                }
+                is NetworkResult.Error -> {
+                    hideShimmerEffect()
+                    loadDataFromCache()
+                    Toast.makeText(
+                        requireContext(),
+                        response.message.toString(),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                is NetworkResult.Loading -> showShimmerEffect()
+            }
+        })
+    }
+
     // function for load data from database
     private fun loadDataFromCache() {
         lifecycleScope.launch {
@@ -192,6 +248,7 @@ class RecipesFragment : Fragment() {
     private fun hideShimmerEffect() {
         binding.recyclerView.hideShimmer()
     }
+
 }
 
 
