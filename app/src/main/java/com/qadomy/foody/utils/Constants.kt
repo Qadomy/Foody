@@ -34,5 +34,9 @@ class Constants {
 
         const val PREFERENCES_BACK_ONLINE = "backOnline"
 
+
+        // recipe bundle
+        const val PARCELABLE_KEY = "recipeBundle"
+
     }
 }
