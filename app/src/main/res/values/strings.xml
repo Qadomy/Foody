@@ -38,5 +38,6 @@
     <string name="apply">Apply</string>
     <string name="vegan">Vegan</string>
     <string name="search">Search</string>
+    <string name="details">Details</string>
 
 </resources>
