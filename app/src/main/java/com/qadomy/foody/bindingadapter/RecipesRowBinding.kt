@@ -12,6 +12,7 @@ import coil.load
 import com.qadomy.foody.R
 import com.qadomy.foody.model.Result
 import com.qadomy.foody.ui.screens.recipes.RecipesFragmentDirections
+import org.jsoup.Jsoup
 import java.lang.Exception
 
 class RecipesRowBinding {
@@ -86,6 +87,17 @@ class RecipesRowBinding {
                 crossfade(600)
                 // set error place holder icon when have error
                 error(R.drawable.ic_image_not_supported)
+            }
+        }
+
+
+
+        @BindingAdapter("parseHtml")
+        @JvmStatic
+        fun parseHtml(textView: TextView, description: String?){
+            if(description != null) {
+                val desc = Jsoup.parse(description).text()
+                textView.text = desc
             }
         }
 

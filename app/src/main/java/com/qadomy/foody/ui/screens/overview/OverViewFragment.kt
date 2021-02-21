@@ -11,6 +11,7 @@ import com.qadomy.foody.R
 import com.qadomy.foody.model.Result
 import com.qadomy.foody.utils.Constants.Companion.PARCELABLE_KEY
 import kotlinx.android.synthetic.main.fragment_over_view.view.*
+import org.jsoup.Jsoup
 
 class OverViewFragment : Fragment() {
 
@@ -28,7 +29,10 @@ class OverViewFragment : Fragment() {
         view.title_textView.text = myBundle?.title
         view.likes_textView.text = myBundle?.aggregateLikes.toString()
         view.time_textView.text = myBundle?.readyInMinutes.toString()
-        view.summary_textView.text = myBundle?.summary
+        myBundle?.summary.let {
+            val summary = Jsoup.parse(it).text()
+            view.summary_textView.text = summary
+        }
 
 
         if(myBundle?.vegetarian == true){
