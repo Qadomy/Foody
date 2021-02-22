@@ -48,5 +48,9 @@
     <string name="cheap">Cheap</string>
     <string name="healthy">Healthy</string>
     <string name="dairy_free">Dairy Free</string>
+    <string name="name">Name</string>
+    <string name="grams">Grams</string>
+    <string name="consistency">Consistency</string>
+    <string name="original">Original</string>
 
 </resources>
