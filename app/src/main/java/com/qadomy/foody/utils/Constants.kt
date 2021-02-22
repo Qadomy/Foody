@@ -3,6 +3,7 @@ package com.qadomy.foody.utils
 class Constants {
     companion object {
         const val BASE_URL = "https://api.spoonacular.com"
+        const val BASE_IMAGE_URL = "https://spoonacular.com/cdn/ingredients_100x100/"
         const val API_KEY = "7763ffcd891c43b2b30efdd0d41850e5"
 
 
