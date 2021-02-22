@@ -22,6 +22,7 @@ class OverViewFragment : Fragment() {
         // Inflate the layout for this fragment
         val view =  inflater.inflate(R.layout.fragment_over_view, container, false)
 
+        // read data from details activity
         val args = arguments
         val myBundle:Result? = args?.getParcelable(PARCELABLE_KEY)
 
