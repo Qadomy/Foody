@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.qadomy.foody.model.FoodRecipe
+import com.qadomy.foody.model.Result
 
 class RecipesTypeConverter {
 
@@ -24,6 +25,23 @@ class RecipesTypeConverter {
     @TypeConverter
     fun convertStringToFoodRecipe(data: String): FoodRecipe{
         val listType = object :TypeToken<FoodRecipe>(){}.type
+        return gson.fromJson(data, listType)
+    }
+
+    /**
+     * this function we convert Food Result type to JSON string to store in database
+     */
+    @TypeConverter
+    fun convertResultToString(result: Result):String{
+        return gson.toJson(result)
+    }
+
+    /**
+     * this function we convert String to Food Result to read it from database
+     */
+    @TypeConverter
+    fun convertStringToResult(data:String):Result{
+        val listType = object :TypeToken<Result>(){}.type
         return gson.fromJson(data, listType)
     }
 }
