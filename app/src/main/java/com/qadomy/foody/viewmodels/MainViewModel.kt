@@ -7,6 +7,7 @@ import android.net.NetworkCapabilities
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.qadomy.foody.data.Repository
+import com.qadomy.foody.data.database.entities.FavoritesEntity
 import com.qadomy.foody.data.database.entities.RecipesEntity
 import com.qadomy.foody.model.FoodRecipe
 import com.qadomy.foody.utils.NetworkResult
@@ -24,7 +25,9 @@ class MainViewModel @ViewModelInject constructor(
     // region ROOM
 
     // asLiveData() extinction for convert [Flow] to live data
-    val readRecipes: LiveData<List<RecipesEntity>> = repository.local.readDatabase().asLiveData()
+    val readRecipes: LiveData<List<RecipesEntity>> = repository.local.readRecipes().asLiveData()
+    val readFavouriteRecipes: LiveData<List<FavoritesEntity>> =
+        repository.local.readFavouriteRecipes().asLiveData()
 
     /*
     function for insert data to local database
@@ -34,6 +37,31 @@ class MainViewModel @ViewModelInject constructor(
             repository.local.insertRecipes(recipesEntity)
         }
 
+
+    /*
+    function for insert recipe in favourite database
+     */
+    private fun insertFavouriteRecipe(favoritesEntity: FavoritesEntity) =
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.local.insertFavoriteRecipe(favoritesEntity)
+        }
+
+    /*
+   function for delete recipe from favourite database
+    */
+    private fun deleteFavouriteRecipe(favoritesEntity: FavoritesEntity) =
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.local.deleteFavoriteRecipe(favoritesEntity)
+        }
+
+    /*
+   function for delete all recipes from favourite database
+    */
+    private fun deleteAllFavouriteRecipe() =
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.local.deleteAllFavouriteRecipes()
+        }
+
     // endregion
 
     /** RETROFIT*/
@@ -41,7 +69,7 @@ class MainViewModel @ViewModelInject constructor(
 
     // MutableLiveData for store food recipes
     var recipesResponse: MutableLiveData<NetworkResult<FoodRecipe>> = MutableLiveData()
-    var searchRecipesResponse:MutableLiveData<NetworkResult<FoodRecipe>> = MutableLiveData()
+    var searchRecipesResponse: MutableLiveData<NetworkResult<FoodRecipe>> = MutableLiveData()
 
     /*
     get recipes using scope from repository
@@ -49,7 +77,8 @@ class MainViewModel @ViewModelInject constructor(
     fun getRecipes(queries: Map<String, String>) = viewModelScope.launch {
         getRecipesSafeCall(queries)
     }
-    fun searchRecipes(searchQuery:Map<String, String>) = viewModelScope.launch {
+
+    fun searchRecipes(searchQuery: Map<String, String>) = viewModelScope.launch {
         searchRecipesSafeCall(searchQuery)
     }
     // endregion
@@ -69,7 +98,7 @@ class MainViewModel @ViewModelInject constructor(
                  * cache data in local database immediately after we recived it from API
                  */
                 val foodRecipe = recipesResponse.value!!.data
-                if(foodRecipe != null){
+                if (foodRecipe != null) {
                     // if data response not null [empty] we get data from offline database
                     offlineCacheRecipe(foodRecipe)
                 }
