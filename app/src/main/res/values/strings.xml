@@ -52,5 +52,6 @@
     <string name="grams">Grams</string>
     <string name="consistency">Consistency</string>
     <string name="original">Original</string>
+    <string name="save_to_favourite">Save to favourite</string>
 
 </resources>
